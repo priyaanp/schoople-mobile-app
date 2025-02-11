@@ -1,5 +1,5 @@
 import 'package:Schoople/core/baseurl/base_url.dart';
-import 'package:Schoople/domain/app_state_cubit.dart';
+import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:Schoople/presentation/login/screen_login.dart';
 import 'package:Schoople/presentation/main_page/widgets/bottom_nav.dart';

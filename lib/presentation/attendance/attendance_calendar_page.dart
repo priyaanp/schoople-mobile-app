@@ -1,3 +1,4 @@
+import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/cubit/attendance_cubit.dart';
 import 'package:Schoople/models/attendance_model.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +19,11 @@ class _AttendanceCalendarPageState extends State<AttendanceCalendarPage> {
   void initState() {
     super.initState();
     _attendanceMap = {};
-    final token = "YOUR_AUTH_TOKEN"; // Replace with your token
-    context.read<AttendanceCubit>().fetchAttendance(token);
+    
+      final state = context.read<AppStateCubit>().state;
+      final token = state.token;  
+      final studentId = state.studentId;
+    context.read<AttendanceCubit>().fetchAttendance(token!,studentId!);
   }
 
   @override
@@ -89,7 +93,7 @@ class _AttendanceCalendarPageState extends State<AttendanceCalendarPage> {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(2),
       ),
       margin: const EdgeInsets.all(4.0),
       child: Stack(

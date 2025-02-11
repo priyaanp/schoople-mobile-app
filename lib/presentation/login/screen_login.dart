@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:Schoople/domain/app_state_cubit.dart';
-import 'package:Schoople/domain/profile/models/profile/profile/profile.dart';
+import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/core/api_end_ponts.dart';
-import '../../infrastructure/api_key.dart';
+
 import '../main_page/screen_main_page.dart';
 import 'package:http/http.dart' as http;
 

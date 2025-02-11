@@ -1,3 +1,4 @@
+import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/attendance_model.dart';
 import 'package:http/http.dart' as http;
@@ -22,11 +23,11 @@ class AttendanceError extends AttendanceState {
 class AttendanceCubit extends Cubit<AttendanceState> {
   AttendanceCubit() : super(AttendanceInitial());
 
-  Future<void> fetchAttendance(String token) async {
+  Future<void> fetchAttendance(String token, int studentId) async {
     emit(AttendanceLoading());
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5000/api/attendances/3'),
+        Uri.parse("${ApiEndPoints.baseUrl}/api/attendances/$studentId"),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {

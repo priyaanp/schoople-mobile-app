@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:Schoople/domain/app_state_cubit.dart';
+import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,8 +47,7 @@ class _TimetablePageState extends State<TimetablePage> {
       final academicYearId = state.academicYearId;
       final schoolId = state.schoolId;
       final gradeSectionId = state.gradeSectionId;
-      print("test here go");
-      print(academicYearId);
+ 
       final response = await http.get(
         Uri.parse(
             "${ApiEndPoints.baseUrl}/api/timetable-details?academic_year_id=${academicYearId}&school_id=${schoolId}&school_grade_section_id=${gradeSectionId}"),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../Home/screen_home.dart';
 import '../downloads/widgets/screen_downloads.dart';
 import '../profile/screen_profile.dart';
-import '../new_and_hot/screen_new_and_hot.dart';
 import '../search/screen_search.dart';
 import 'widgets/bottom_nav.dart';
 
@@ -12,7 +11,7 @@ class ScreenMainPage extends StatelessWidget {
 
   final _pages = [
     ScreenHome(),
-    ScreenNewAndHot(),
+    StudentProfilePage(),
     StudentProfilePage(),
     ScreenSearch(),
     ScreenDownloads(),
