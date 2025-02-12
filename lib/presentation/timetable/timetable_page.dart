@@ -3,6 +3,7 @@ import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -25,9 +26,6 @@ class _TimetablePageState extends State<TimetablePage> {
   late String selectedDay;
   List<dynamic> timetableData = [];
 
-  final String apiUrl =
-      "http://127.0.0.1:5000/api/timetable-details?academic_year_id=1&school_id=1&school_grade_section_id=1";
-
   @override
   void initState() {
     super.initState();
@@ -47,7 +45,7 @@ class _TimetablePageState extends State<TimetablePage> {
       final academicYearId = state.academicYearId;
       final schoolId = state.schoolId;
       final gradeSectionId = state.gradeSectionId;
- 
+
       final response = await http.get(
         Uri.parse(
             "${ApiEndPoints.baseUrl}/api/timetable-details?academic_year_id=${academicYearId}&school_id=${schoolId}&school_grade_section_id=${gradeSectionId}"),
@@ -71,26 +69,22 @@ class _TimetablePageState extends State<TimetablePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Timetable"),
-        backgroundColor: Color(0xFF00A1B6)
-      ),
-      body: Container(
-                decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter, // Approximate for 242 degrees
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF00A1B6), // Start color
-              Color(0xFF0276A8), // End color
-            ],
-            stops: [0.1113, 1.0], // Corresponding stops
+        title: Text(
+          "Timetable",
+          style: GoogleFonts.inter(
+            fontSize: 24,
+            color: const Color(0xFF0278A9),
+            fontStyle: FontStyle.normal,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        backgroundColor: Color(0xFF00A1B6),
+      ),
+      body: SafeArea(
         child: Column(
           children: [
             // Day Selection Tabs
             Container(
-              
               height: 50,
               color: Colors.blueAccent.withOpacity(0.2),
               child: ListView.builder(
@@ -106,7 +100,6 @@ class _TimetablePageState extends State<TimetablePage> {
                       });
                     },
                     child: Container(
-                      
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -120,8 +113,9 @@ class _TimetablePageState extends State<TimetablePage> {
                         child: Text(
                           day,
                           style: TextStyle(
-                            color:
-                                selectedDay == day ? Colors.white : Colors.black,
+                            color: selectedDay == day
+                                ? Colors.white
+                                : Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

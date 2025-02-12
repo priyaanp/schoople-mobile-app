@@ -1,5 +1,6 @@
 
 import 'package:Schoople/presentation/attendance/attendance_calendar_page.dart';
+import 'package:Schoople/presentation/events/events_page.dart';
 import 'package:Schoople/presentation/profile/screen_profile.dart';
 import 'package:Schoople/presentation/timetable/timetable_page.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class DashboardItem extends StatelessWidget {
         onTap: () {
           // Handle item tap
           print('Tapped on ${title}');
-          _goToPage(2,context);
+          _goToPage(title,context);
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -125,21 +126,25 @@ class DashboardItem extends StatelessWidget {
       ),
     );
   }
-  void _goToPage(int number, BuildContext ctx) {
+  void _goToPage(String title, BuildContext ctx) {
 
    Widget page;
 
    // You can also use if else here.
-   switch(number) {
-     case 0:
+   switch(title) {
+     case 'You':
        page = StudentProfilePage();
      break;
-     case 1:
+     case 'Time Table':
        page = TimetablePage();
      break;
-     case 2:
+     case 'Attendance':
        page = AttendanceCalendarPage();
      break;     
+     case 'Events':
+       page = EventsPage(type: 1);
+     break; 
+     
      default:
        page = StudentProfilePage(); // default item when no matching category found
    }

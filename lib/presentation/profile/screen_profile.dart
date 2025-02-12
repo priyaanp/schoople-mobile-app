@@ -35,8 +35,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
         Uri.parse("${ApiEndPoints.baseUrl}/api/student-data/$studentId"),
         headers: {'Authorization': 'Bearer $token'},
       );
-      print("11111111111111111111");
-      print(response.statusCode);
+
       if (response.statusCode == 200) {
         setState(() {
           studentData = json.decode(response.body)['student_data'];
