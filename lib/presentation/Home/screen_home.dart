@@ -1,6 +1,7 @@
 
 import 'package:Schoople/presentation/attendance/attendance_calendar_page.dart';
 import 'package:Schoople/presentation/events/events_page.dart';
+import 'package:Schoople/presentation/exam_schedule/exam_schedule_page.dart';
 import 'package:Schoople/presentation/profile/screen_profile.dart';
 import 'package:Schoople/presentation/timetable/timetable_page.dart';
 import 'package:flutter/material.dart';
@@ -144,6 +145,9 @@ class DashboardItem extends StatelessWidget {
      case 'Events':
        page = EventsPage(type: 1);
      break; 
+    case 'Exam schedule':
+       page = ExamSchedulePage();
+     break;   
      
      default:
        page = StudentProfilePage(); // default item when no matching category found

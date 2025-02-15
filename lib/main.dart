@@ -1,6 +1,6 @@
 import 'package:Schoople/cubit/attendance_cubit.dart';
 import 'package:Schoople/cubit/app_state_cubit.dart';
-import 'package:Schoople/presentation/attendance/attendance_calendar_page.dart';
+import 'package:Schoople/cubit/exam_schedule_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +23,10 @@ class MyApp extends StatelessWidget {
       BlocProvider(create: (ctx) => AppStateCubit()),
       BlocProvider(
         create: (context) => AttendanceCubit(),       
-      )
+      ),
+       BlocProvider(
+        create: (context) => ExamScheduleCubit(),       
+      ),
       ],
       child: MaterialApp(
         title: 'Schoople',

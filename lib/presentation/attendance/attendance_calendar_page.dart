@@ -42,18 +42,31 @@ class _AttendanceCalendarPageState extends State<AttendanceCalendarPage> {
       backgroundColor: Color(0xFF00A1B6),
       ),
       body: SafeArea(
-        child: BlocBuilder<AttendanceCubit, AttendanceState>(
-          builder: (context, state) {
-            if (state is AttendanceLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is AttendanceError) {
-              return Center(child: Text(state.message));
-            } else if (state is AttendanceLoaded) {
-              _attendanceMap = _mapAttendanceData(state.attendances);
-              return buildCalendar();
-            }
-            return Container();
-          },
+        child: Container(
+                  decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight, // Approximate for 242 degrees
+            end: Alignment.topLeft,
+            colors: [
+              Color(0xFF0276A8), // Start color
+              Color(0xFF00A1B6), // End color
+            ],
+            stops: [0.1113, 1.0], // Corresponding stops
+          ),
+        ),
+          child: BlocBuilder<AttendanceCubit, AttendanceState>(
+            builder: (context, state) {
+              if (state is AttendanceLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is AttendanceError) {
+                return Center(child: Text(state.message));
+              } else if (state is AttendanceLoaded) {
+                _attendanceMap = _mapAttendanceData(state.attendances);
+                return buildCalendar();
+              }
+              return Container();
+            },
+          ),
         ),
       ),
     );

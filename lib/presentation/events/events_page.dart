@@ -36,27 +36,40 @@ class EventsPage extends StatelessWidget {
             ),
           ),
           body: SafeArea(
-            child: BlocBuilder<EventsCubit, EventsState>(
-              builder: (context, state) {
-                if (state is EventsLoading) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (state is EventsError) {
-                  return Center(child: Text(state.message));
-                } else if (state is EventsLoaded) {
-                  List<EventModel> upcoming =
-                      state.events.where((e) => e.color == "Green").toList();
-                  List<EventModel> finished =
-                      state.events.where((e) => e.color == "Red").toList();
-            
-                  return TabBarView(
-                    children: [
-                      EventList(events: upcoming),
-                      EventList(events: finished),
-                    ],
-                  );
-                }
-                return Container();
-              },
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topRight, // Approximate for 242 degrees
+                  end: Alignment.topLeft,
+                  colors: [
+                    Color(0xFF0276A8), // Start color
+                    Color(0xFF00A1B6), // End color
+                  ],
+                  stops: [0.1113, 1.0], // Corresponding stops
+                ),
+              ),
+              child: BlocBuilder<EventsCubit, EventsState>(
+                builder: (context, state) {
+                  if (state is EventsLoading) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (state is EventsError) {
+                    return Center(child: Text(state.message));
+                  } else if (state is EventsLoaded) {
+                    List<EventModel> upcoming =
+                        state.events.where((e) => e.color == "Green").toList();
+                    List<EventModel> finished =
+                        state.events.where((e) => e.color == "Red").toList();
+
+                    return TabBarView(
+                      children: [
+                        EventList(events: upcoming),
+                        EventList(events: finished),
+                      ],
+                    );
+                  }
+                  return Container();
+                },
+              ),
             ),
           ),
         ),

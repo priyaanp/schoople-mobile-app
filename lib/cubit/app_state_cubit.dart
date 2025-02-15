@@ -3,13 +3,14 @@ import 'package:bloc/bloc.dart';
 class AppStateCubit extends Cubit<AppState> {
   AppStateCubit() : super(AppState());
 
-  void setAuthData(String token, int studentId, int academicYearId, int schoolId, int gradeSectionId) {
+  void setAuthData(String token, int studentId, int academicYearId, int schoolId, int gradeSectionId, int gradeId) {
     emit(state.copyWith(
       token: token,
       studentId: studentId,
       academicYearId: academicYearId,
       schoolId: schoolId,
       gradeSectionId: gradeSectionId,
+      gradeId:gradeId
     ));
   }
 }
@@ -20,6 +21,7 @@ class AppState {
   final int? academicYearId;
   final int? schoolId;
   final int? gradeSectionId;
+  final int? gradeId;
 
   AppState({
     this.token,
@@ -27,6 +29,7 @@ class AppState {
     this.academicYearId,
     this.schoolId,
     this.gradeSectionId,
+    this.gradeId
   });
 
   AppState copyWith({
@@ -35,6 +38,7 @@ class AppState {
     int? academicYearId,
     int? schoolId,
     int? gradeSectionId,
+    int? gradeId,
   }) {
     return AppState(
       token: token ?? this.token,
@@ -42,6 +46,7 @@ class AppState {
       academicYearId: academicYearId ?? this.academicYearId,
       schoolId: schoolId ?? this.schoolId,
       gradeSectionId: gradeSectionId ?? this.gradeSectionId,
+      gradeId: gradeId ?? this.gradeId
     );
   }
 }

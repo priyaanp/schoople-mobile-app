@@ -5,7 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 import '../../domain/core/api_end_ponts.dart';
 
@@ -37,8 +37,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
-    final padding = MediaQuery.of(context).padding;
+    final Size size = MediaQuery.of(context).size;   
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
@@ -146,13 +145,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
                                               icon: const Icon(Icons.person)),
                                         ),
                                         style: TextStyle(color: Colors.black),
-                                        // validator: (value) {
-                                        //   if (value == null || value.isEmpty) {
-                                        //     return 'Value is empty';
-                                        //   } else {
-                                        //     return null;
-                                        //   }
-                                        // },
+ 
                                       ),
                                     ),
                                     const SizedBox(
@@ -288,14 +281,9 @@ class _ScreenLoginState extends State<ScreenLogin> {
     final _username = _usernameController.text;
     final _password = _passwordController.text;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    Map<String, String> headers = {"Content-Type": "application/json"};
-    String body = json.encode({"username": _username, "password": _password});
+
     try {
-      // if (response.statusCode == 200 || response.statusCode == 201) {
-      // final responseJson = jsonDecode(response.body) as Map<String, dynamic>;
-      //  Profile profile = Profile.fromJson(responseJson);
-      print(_username);
-      print(_password);
+
 
       if (_username.isEmpty || _password.isEmpty) {
         setState(() {
@@ -321,7 +309,7 @@ class _ScreenLoginState extends State<ScreenLogin> {
               Uri.parse("${ApiEndPoints.baseUrl}api/login"),
               headers: headers,
               body: body);
-          print(response.statusCode);
+          
           if (response.statusCode == 200) {
             var data = json.decode(response.body);
             String token = data['token'];
@@ -329,13 +317,11 @@ class _ScreenLoginState extends State<ScreenLogin> {
             int academicyearId = data['student_data']['active_academic_year_id'];
             int schoolId = data['student_data']['school_id'];
             int gradeSectionId = data['student_data']['school_grade_section_id'];
-            print("gradeSectionId");
-            print(gradeSectionId);
+            int gradeId = data['student_data']['grade_id'];
+
             context.read<AppStateCubit>().setAuthData(
-                token, studentId, academicyearId, schoolId, gradeSectionId);
-            // final Map<String, dynamic> jsonResponse = json.decode(response.body);
-            // final String token = jsonResponse['token'];
-            // final studentData = jsonResponse['student_data'];
+                token, studentId, academicyearId, schoolId, gradeSectionId, gradeId);
+  
 
             if (token.isNotEmpty) {
               Navigator.push(
@@ -356,9 +342,8 @@ class _ScreenLoginState extends State<ScreenLogin> {
             ));
           }
         } catch (e) {
-          print(e.toString());
-          print(e);
-          _showErrorDialog1("Unable to connect to the server.");
+
+          _showErrorDialog("Unable to connect to the server.");
         } finally {
           setState(() {
             _isLoading = false;
@@ -371,64 +356,9 @@ class _ScreenLoginState extends State<ScreenLogin> {
     } catch (_) {}
   }
 
-  void _login(BuildContext context) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    String url = 'http://127.0.0.1:5000/api/login';
-    Map<String, String> headers = {"Content-Type": "application/json"};
-    String body = json.encode({
-      "username": _usernameController.text,
-      "password": _passwordController.text
-    });
-
-    try {
-      final response =
-          await http.post(Uri.parse(url), headers: headers, body: body);
-      print(response.statusCode);
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        final String token = jsonResponse['token'];
-        final studentData = jsonResponse['student_data'];
-
-        if (token.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context1) => ScreenMainPage()),
-          );
-        }
-      } else {
-        _showErrorDialog("Invalid login credentials.");
-      }
-    } catch (e) {
-      print(e.toString());
-      print(e);
-      _showErrorDialog1("Unable to connect to the server.");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
+  
 
   void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Login Error"),
-        content: Text(message),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text("Okay00"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showErrorDialog1(String message) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
