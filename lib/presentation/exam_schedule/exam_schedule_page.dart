@@ -1,5 +1,6 @@
 import 'package:Schoople/cubit/exam_schedule_cubit.dart';
 import 'package:Schoople/models/exam_schedule_model.dart';
+import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,19 +10,8 @@ class ExamSchedulePage extends StatelessWidget {
   Widget build(BuildContext context) {
     context.read<ExamScheduleCubit>().fetchExamSchedules(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Exam Schedule",
-          style: GoogleFonts.inter(
-            fontSize: 24,
-            color: const Color(0xFF0278A9),
-            fontStyle: FontStyle.normal,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: Color(0xFF00A1B6),
-      ),
+    return CustomScaffold(
+      title: "Exan Schedule",
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(
@@ -42,7 +32,7 @@ class ExamSchedulePage extends StatelessWidget {
               } else if (state is ExamScheduleLoaded) {
                 final now = DateTime.now();
                 final today = DateTime(now.year, now.month, now.day);
-        
+
                 final upcoming = _groupByTerm(
                   state.schedules
                       .where((e) => _isUpcoming(e, today, state.schedules))
@@ -53,7 +43,7 @@ class ExamSchedulePage extends StatelessWidget {
                       .where((e) => !_isUpcoming(e, today, state.schedules))
                       .toList(),
                 );
-        
+
                 return DefaultTabController(
                   length: 2,
                   child: Column(

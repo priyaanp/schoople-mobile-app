@@ -3,10 +3,10 @@ import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/cubit/exam_mark_cubit.dart';
 import 'package:Schoople/cubit/exam_mark_state.dart';
 import 'package:Schoople/models/exam_mark.dart';
+import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 
 class ExamMarksPage extends StatefulWidget {
   @override
@@ -28,37 +28,28 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
   }
 
   void fetchExamMarks() {
-    context.read<ExamMarkCubit>().fetchExamMarks(studentId, selectedTerm, token);
+    context
+        .read<ExamMarkCubit>()
+        .fetchExamMarks(studentId, selectedTerm, token);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Report Card",
-                style: GoogleFonts.inter(
-                fontSize: 24,
-                color: const Color(0xFF0278A9),
-                fontStyle: FontStyle.normal,
-                fontWeight: FontWeight.w600,
-              ),
-      ),
-      backgroundColor: Color(0xFF00A1B6), 
-      ),
-      
-      
+    return CustomScaffold(
+      title: "Report Card",
       body: SafeArea(
         child: Container(
-                        decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topRight, // Approximate for 242 degrees
-                  end: Alignment.topLeft,
-                  colors: [
-                    Color(0xFF0276A8), // Start color
-                    Color(0xFF00A1B6), // End color
-                  ],
-                  stops: [0.1113, 1.0], // Corresponding stops
-                ),
-              ),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topRight, // Approximate for 242 degrees
+              end: Alignment.topLeft,
+              colors: [
+                Color(0xFF0276A8), // Start color
+                Color(0xFF00A1B6), // End color
+              ],
+              stops: [0.1113, 1.0], // Corresponding stops
+            ),
+          ),
           child: Column(
             children: [
               _buildFilterDropdown(),
@@ -68,9 +59,9 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
                     if (state is ExamMarkLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is ExamMarkLoaded) {
-                      if(state.marks.isEmpty){
+                      if (state.marks.isEmpty) {
                         return const Center(child: Text("No marks available"));
-                      }                     
+                      }
                       return _buildReportCard(state.marks);
                     } else if (state is ExamMarkError) {
                       return Center(child: Text(state.message));
@@ -107,7 +98,14 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
                 fetchExamMarks();
               });
             },
-            items: ["Midterm 1","First","Midterm 2", "Second", "Midterm 3","Third"]
+            items: [
+              "Midterm 1",
+              "First",
+              "Midterm 2",
+              "Second",
+              "Midterm 3",
+              "Third"
+            ]
                 .map((term) => DropdownMenuItem(
                       value: term,
                       child: Padding(
@@ -123,8 +121,10 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
   }
 
   Widget _buildReportCard(List<ExamMark> marks) {
-    double totalMarksObtained = marks.fold(0, (sum, mark) => sum + mark.marksObtained);
-    double totalMarksOutOf = marks.fold(0, (sum, mark) => sum + mark.marksOutOf);
+    double totalMarksObtained =
+        marks.fold(0, (sum, mark) => sum + mark.marksObtained);
+    double totalMarksOutOf =
+        marks.fold(0, (sum, mark) => sum + mark.marksOutOf);
     double percentage = (totalMarksObtained / totalMarksOutOf) * 100;
     String finalGrade = _calculateGrade(percentage);
     Color gradeColor = finalGrade == "E" ? Colors.red : Colors.black;
@@ -135,11 +135,12 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
         children: [
           Card(
             elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                children: [                    
+                children: [
                   Table(
                     border: TableBorder.all(color: Colors.grey),
                     columnWidths: const {
@@ -151,7 +152,8 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
                     children: [
                       _buildTableHeader(),
                       for (var mark in marks) _buildTableRow(mark),
-                      _buildTotalRow(totalMarksObtained, totalMarksOutOf, percentage, finalGrade, gradeColor),
+                      _buildTotalRow(totalMarksObtained, totalMarksOutOf,
+                          percentage, finalGrade, gradeColor),
                     ],
                   ),
                 ],
@@ -190,19 +192,22 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
     );
   }
 
-  TableRow _buildTotalRow(double obtained, double total, double percentage, String grade, Color gradeColor) {
+  TableRow _buildTotalRow(double obtained, double total, double percentage,
+      String grade, Color gradeColor) {
     return TableRow(
       decoration: BoxDecoration(color: Colors.green[100]),
       children: [
         _buildTableCell("Total", isHeader: true),
         _buildTableCell(obtained.toStringAsFixed(2), isHeader: true),
         _buildTableCell(total.toStringAsFixed(2), isHeader: true),
-       _buildTableCell("$grade (${percentage.toStringAsFixed(1)}%)", isHeader: true, textColor: gradeColor), // Rounded %
+        _buildTableCell("$grade (${percentage.toStringAsFixed(1)}%)",
+            isHeader: true, textColor: gradeColor), // Rounded %
       ],
     );
   }
 
-  Widget _buildTableCell(String text, {bool isHeader = false, Color textColor = Colors.black}) {
+  Widget _buildTableCell(String text,
+      {bool isHeader = false, Color textColor = Colors.black}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(

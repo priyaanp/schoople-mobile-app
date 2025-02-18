@@ -43,38 +43,40 @@ class ScreenHome extends StatelessWidget {
         ),
         backgroundColor: Color(0xFF00A1B6),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter, // Approximate for 242 degrees
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF00A1B6), // Start color
-              Color(0xFF0276A8), // End color
-            ],
-            stops: [0.1113, 1.0], // Corresponding stops
-          ),
-        ),
-        padding: const EdgeInsets.all(12.0),
+      body: SafeArea(
         child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.0),
-            color: Colors.white,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter, // Approximate for 242 degrees
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF00A1B6), // Start color
+                Color(0xFF0276A8), // End color
+              ],
+              stops: [0.1113, 1.0], // Corresponding stops
+            ),
           ),
           padding: const EdgeInsets.all(12.0),
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 1.0,
-              mainAxisSpacing: 1.0,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.0),
+              color: Colors.white,
             ),
-            itemCount: dashboardItems.length,
-            itemBuilder: (context, index) {
-              return DashboardItem(
-                title: dashboardItems[index]['title']!,
-                iconPath: dashboardItems[index]['icon']!,
-              );
-            },
+            padding: const EdgeInsets.all(12.0),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 1.0,
+                mainAxisSpacing: 1.0,
+              ),
+              itemCount: dashboardItems.length,
+              itemBuilder: (context, index) {
+                return DashboardItem(
+                  title: dashboardItems[index]['title']!,
+                  iconPath: dashboardItems[index]['icon']!,
+                );
+              },
+            ),
           ),
         ),
       ),

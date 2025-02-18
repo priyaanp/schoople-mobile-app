@@ -3,6 +3,7 @@ import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:Schoople/presentation/login/screen_login.dart';
 import 'package:Schoople/presentation/main_page/widgets/bottom_nav.dart';
+import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -67,23 +68,8 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'Profile',
-          style: GoogleFonts.inter(
-            fontSize: 24,
-            color: const Color(0xFF0278A9),
-            fontStyle: FontStyle.normal,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: Color(0xFF00A1B6),
-      ),
+      return CustomScaffold(
+      title: "Profile",
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

@@ -1,3 +1,4 @@
+import 'package:Schoople/presentation/main_page/widgets/bottom_navigation.dart';
 import 'package:flutter/material.dart';
 
 import '../Home/screen_home.dart';
@@ -27,7 +28,7 @@ class ScreenMainPage extends StatelessWidget {
           },
         ),
       ),
-      bottomNavigationBar: BottomNavigationWidgets(),
+      bottomNavigationBar: BottomNavPage(),
     );
   }
   
