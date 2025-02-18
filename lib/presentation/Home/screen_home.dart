@@ -1,6 +1,7 @@
 
 import 'package:Schoople/presentation/attendance/attendance_calendar_page.dart';
 import 'package:Schoople/presentation/events/events_page.dart';
+import 'package:Schoople/presentation/exam_mark/exam_mark_details_page.dart';
 import 'package:Schoople/presentation/exam_schedule/exam_schedule_page.dart';
 import 'package:Schoople/presentation/profile/screen_profile.dart';
 import 'package:Schoople/presentation/timetable/timetable_page.dart';
@@ -148,6 +149,9 @@ class DashboardItem extends StatelessWidget {
     case 'Exam schedule':
        page = ExamSchedulePage();
      break;   
+    case 'Reports':
+       page = ExamMarksPage();
+     break;      
      
      default:
        page = StudentProfilePage(); // default item when no matching category found

@@ -10,6 +10,9 @@ class EventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if(events.isEmpty){
+      return const Center(child: Text("No events available"));
+    }
     return ListView.builder(
       itemCount: events.length,
       itemBuilder: (context, index) {
