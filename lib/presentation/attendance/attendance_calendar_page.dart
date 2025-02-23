@@ -4,11 +4,12 @@ import 'package:Schoople/models/attendance_model.dart';
 import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
 class AttendanceCalendarPage extends StatefulWidget {
+  AttendanceCalendarPage({required this.type});
+  final int type; 
   @override
   _AttendanceCalendarPageState createState() => _AttendanceCalendarPageState();
 }
@@ -24,13 +25,14 @@ class _AttendanceCalendarPageState extends State<AttendanceCalendarPage> {
     final state = context.read<AppStateCubit>().state;
     final token = state.token;
     final studentId = state.studentId;
-    context.read<AttendanceCubit>().fetchAttendance(token!, studentId!);
+    context.read<AttendanceCubit>().fetchAttendance(token!, studentId!,context);
   }
 
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
       title: "Attendance",
+      type:widget.type,
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(

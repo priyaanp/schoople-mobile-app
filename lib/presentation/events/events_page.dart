@@ -7,9 +7,15 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'event_list.dart';
 
-class EventsPage extends StatelessWidget {
+class EventsPage extends StatefulWidget {
   EventsPage({required this.type});
   final int type;
+
+  @override
+  State<EventsPage> createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

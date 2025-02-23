@@ -6,7 +6,7 @@ import 'package:Schoople/models/exam_mark.dart';
 import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class ExamMarksPage extends StatefulWidget {
   @override
@@ -30,13 +30,14 @@ class _ExamMarksPageState extends State<ExamMarksPage> {
   void fetchExamMarks() {
     context
         .read<ExamMarkCubit>()
-        .fetchExamMarks(studentId, selectedTerm, token);
+        .fetchExamMarks(studentId, selectedTerm, token,context);
   }
 
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
       title: "Report Card",
+      type:1,
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(

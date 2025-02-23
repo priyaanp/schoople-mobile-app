@@ -15,9 +15,9 @@ class _BottomNavPageState extends State<BottomNavPage> {
 
   final List<Widget> _pages = [
     ScreenHome(),
-    StudentProfilePage(),
-    TimetablePage(),
-    AttendanceCalendarPage(),
+    StudentProfilePage(type: 2),
+    TimetablePage(type: 2,),
+    AttendanceCalendarPage(type: 2,),
   ];
 
   void _onItemTapped(int index) {

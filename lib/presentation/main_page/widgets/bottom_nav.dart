@@ -22,16 +22,23 @@ class BottomNavigationWidgets extends StatelessWidget {
             selectedIconTheme: const IconThemeData(color: Colors.white),
             unselectedIconTheme: const IconThemeData(color: Colors.grey),
             items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.collections), label: 'New & Hot'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.account_circle_outlined), label: 'You'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.search), label: 'Search'),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.download), label: 'Download')
-            ]);
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "You",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: "Timetable",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.check_circle),
+            label: "Attendance",
+          ),
+        ],);
       },
     );
   }

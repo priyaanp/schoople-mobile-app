@@ -13,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class StudentProfilePage extends StatefulWidget {
+  StudentProfilePage({required this.type});
+  final int type;
   @override
   _StudentProfilePageState createState() => _StudentProfilePageState();
 }
@@ -28,7 +30,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
 
   Future<void> fetchStudentData() async {
     final state = context.read<AppStateCubit>().state;
-   final token = state.token;
+    final token = state.token;
     final studentId = state.studentId;
 
     try {
@@ -41,6 +43,10 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
         setState(() {
           studentData = json.decode(response.body)['student_data'];
         });
+      } else if (response.statusCode == 401) {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (cxt1) => ScreenLogin()),
+            (route) => false);
       } else {
         _showErrorDialog("Failed to fetch student data.");
       }
@@ -68,8 +74,9 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-      return CustomScaffold(
+    return CustomScaffold(
       title: "Profile",
+      type: widget.type,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

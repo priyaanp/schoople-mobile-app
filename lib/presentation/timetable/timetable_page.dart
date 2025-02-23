@@ -1,14 +1,16 @@
 import 'dart:convert';
 import 'package:Schoople/cubit/app_state_cubit.dart';
 import 'package:Schoople/domain/core/api_end_ponts.dart';
+import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 class TimetablePage extends StatefulWidget {
-  const TimetablePage({Key? key}) : super(key: key);
+    TimetablePage({required this.type});
+  final int type;
+
 
   @override
   _TimetablePageState createState() => _TimetablePageState();
@@ -67,19 +69,9 @@ class _TimetablePageState extends State<TimetablePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Timetable",
-          style: GoogleFonts.inter(
-            fontSize: 24,
-            color: const Color(0xFF0278A9),
-            fontStyle: FontStyle.normal,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: Color(0xFF00A1B6),
-      ),
+    return  CustomScaffold(
+      title: "Timetable",
+      type: widget.type,
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(

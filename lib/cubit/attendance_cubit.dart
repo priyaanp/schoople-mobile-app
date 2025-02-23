@@ -1,4 +1,6 @@
 import 'package:Schoople/domain/core/api_end_ponts.dart';
+import 'package:Schoople/presentation/login/screen_login.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/attendance_model.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +25,7 @@ class AttendanceError extends AttendanceState {
 class AttendanceCubit extends Cubit<AttendanceState> {
   AttendanceCubit() : super(AttendanceInitial());
 
-  Future<void> fetchAttendance(String token, int studentId) async {
+  Future<void> fetchAttendance(String token, int studentId,BuildContext context) async {
     emit(AttendanceLoading());
     try {
       final response = await http.get(
@@ -35,7 +37,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         final List<Attendance> attendances =
             jsonData.map((data) => Attendance.fromJson(data)).toList();
         emit(AttendanceLoaded(attendances));
-      } else {
+      } else if (response.statusCode == 401) {
+        Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (cxt1) => ScreenLogin()), (route) => false);
+  
+      }else {
         emit(AttendanceError('Failed to load attendances.'));
       }
     } catch (e) {

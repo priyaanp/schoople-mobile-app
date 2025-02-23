@@ -5,11 +5,13 @@ class CustomScaffold extends StatelessWidget {
   final String title;
   final Widget body;
   final bool showBackButton;
+  final int type;
 
   const CustomScaffold({
     Key? key,
     required this.title,
     required this.body,
+    required this.type,
     this.showBackButton = true, // By default, show back button
   }) : super(key: key);
 
@@ -17,6 +19,7 @@ class CustomScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: type == 1 ? true : false,
         title: Text(
           title,
           style: GoogleFonts.inter(
@@ -25,14 +28,10 @@ class CustomScaffold extends StatelessWidget {
             fontStyle: FontStyle.normal,
             fontWeight: FontWeight.w600,
           ),
+          
         ),
         backgroundColor: Color(0xFF00A1B6),
-        leading: showBackButton
-            ? IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pop(), // Go back
-              )
-            : null, // Hide back button on home page
+ // Hide back button on home page
       ),
       body: body,
     );

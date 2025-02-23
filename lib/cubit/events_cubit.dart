@@ -1,5 +1,6 @@
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:Schoople/models/event_model.dart';
+import 'package:Schoople/presentation/login/screen_login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
@@ -27,7 +28,11 @@ class EventsCubit extends Cubit<EventsState> {
         List jsonData = jsonDecode(response.body);
         List<EventModel> events = jsonData.map((e) => EventModel.fromJson(e)).toList();
         emit(EventsLoaded(events));
-      } else {
+      } else if (response.statusCode == 401) {
+        Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (cxt1) => ScreenLogin()), (route) => false);
+  
+      }else {
         emit(EventsError("Failed to fetch events."));
       }
     } catch (e) {

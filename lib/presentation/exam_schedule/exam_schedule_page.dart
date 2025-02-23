@@ -5,13 +5,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ExamSchedulePage extends StatelessWidget {
+class ExamSchedulePage extends StatefulWidget {
+  ExamSchedulePage({required this.type});
+  final int type;
+
+  @override
+  State<ExamSchedulePage> createState() => _ExamSchedulePageState();
+}
+
+class _ExamSchedulePageState extends State<ExamSchedulePage> {
   @override
   Widget build(BuildContext context) {
     context.read<ExamScheduleCubit>().fetchExamSchedules(context);
 
     return CustomScaffold(
       title: "Exan Schedule",
+      type:1,
       body: SafeArea(
         child: Container(
           decoration: const BoxDecoration(

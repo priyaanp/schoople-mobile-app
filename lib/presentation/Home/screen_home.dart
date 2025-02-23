@@ -8,8 +8,14 @@ import 'package:Schoople/presentation/timetable/timetable_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ScreenHome extends StatelessWidget {
+class ScreenHome extends StatefulWidget {
   ScreenHome({super.key});
+
+  @override
+  State<ScreenHome> createState() => _ScreenHomeState();
+}
+
+class _ScreenHomeState extends State<ScreenHome> {
   final List<Map<String, String>> dashboardItems = [
     {'title': 'Time Table', 'icon': 'assets/images/time_table.png'},
     {'title': 'Attendance', 'icon': 'assets/images/attendance.png'},
@@ -28,10 +34,12 @@ class ScreenHome extends StatelessWidget {
     {'title': 'My Teacher', 'icon': 'assets/images/my_teacher.png'},
     {'title': 'Principal', 'icon': 'assets/images/principal.png'},
   ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           'Dashboard',
           style: GoogleFonts.inter(
@@ -84,7 +92,7 @@ class ScreenHome extends StatelessWidget {
   }
 }
 
-class DashboardItem extends StatelessWidget {
+class DashboardItem extends StatefulWidget {
   final String title;
   final String iconPath;
 
@@ -95,6 +103,11 @@ class DashboardItem extends StatelessWidget {
   });
 
   @override
+  State<DashboardItem> createState() => _DashboardItemState();
+}
+
+class _DashboardItemState extends State<DashboardItem> {
+  @override
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -104,20 +117,20 @@ class DashboardItem extends StatelessWidget {
       child: InkWell(
         onTap: () {
           // Handle item tap
-          print('Tapped on ${title}');
-          _goToPage(title,context);
+          print('Tapped on ${widget.title}');
+          _goToPage(widget.title,context);
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              iconPath,
+              widget.iconPath,
               width: 50,
               height: 50,
             ),
             //  const SizedBox(height: 10),
             Text(
-              title,
+              widget.title,
               style: GoogleFonts.inter(
                 fontSize: 12,
                 color: const Color(0xFF494949),
@@ -130,6 +143,7 @@ class DashboardItem extends StatelessWidget {
       ),
     );
   }
+
   void _goToPage(String title, BuildContext ctx) {
 
    Widget page;
@@ -137,26 +151,26 @@ class DashboardItem extends StatelessWidget {
    // You can also use if else here.
    switch(title) {
      case 'You':
-       page = StudentProfilePage();
+       page = StudentProfilePage(type: 1);
      break;
      case 'Time Table':
-       page = TimetablePage();
+       page = TimetablePage(type: 1,);
      break;
      case 'Attendance':
-       page = AttendanceCalendarPage();
+       page = AttendanceCalendarPage(type: 1);
      break;     
      case 'Events':
        page = EventsPage(type: 1);
      break; 
     case 'Exam schedule':
-       page = ExamSchedulePage();
+       page = ExamSchedulePage(type:1);
      break;   
     case 'Reports':
        page = ExamMarksPage();
      break;      
      
      default:
-       page = StudentProfilePage(); // default item when no matching category found
+       page = StudentProfilePage(type: 1); // default item when no matching category found
    }
 
    Navigator.push(ctx, MaterialPageRoute(builder: (context) {
