@@ -1,5 +1,6 @@
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:Schoople/presentation/login/screen_login.dart';
+import 'package:Schoople/presentation/main_page/widgets/bottom_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../models/attendance_model.dart';
@@ -38,8 +39,10 @@ class AttendanceCubit extends Cubit<AttendanceState> {
             jsonData.map((data) => Attendance.fromJson(data)).toList();
         emit(AttendanceLoaded(attendances));
       } else if (response.statusCode == 401) {
+        indexChangeNotifier.value = 0;
         Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (cxt1) => ScreenLogin()), (route) => false);
+        
   
       }else {
         emit(AttendanceError('Failed to load attendances.'));
