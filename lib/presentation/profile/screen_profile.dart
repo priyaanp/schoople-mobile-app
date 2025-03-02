@@ -1,5 +1,6 @@
 import 'package:Schoople/core/baseurl/base_url.dart';
 import 'package:Schoople/cubit/app_state_cubit.dart';
+import 'package:Schoople/cubit/student_profile_state.dart';
 import 'package:Schoople/domain/core/api_end_ponts.dart';
 import 'package:Schoople/presentation/login/screen_login.dart';
 import 'package:Schoople/presentation/main_page/widgets/bottom_nav.dart';
@@ -7,10 +8,42 @@ import 'package:Schoople/presentation/main_page/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+
+class StudentProfileCubit extends Cubit<StudentProfileState> {
+  StudentProfileCubit() : super(StudentProfileInitial());
+
+  void fetchStudentProfile(BuildContext context) async {
+    if (state is StudentProfileLoading) return; // Prevent duplicate calls
+    try {
+      emit(StudentProfileLoading());
+      final studentData = await getStudentProfile(context);
+      emit(StudentProfileLoaded(studentData));
+    } catch (e) {
+      emit(StudentProfileError("Failed to load profile"));
+    }
+  }
+
+  Future<Map<String, dynamic>> getStudentProfile(BuildContext context) async {
+    final state = context.read<AppStateCubit>().state;
+    final token = state.token;
+    final studentId = state.studentId;
+    final response = await http.get(
+      Uri.parse("${ApiEndPoints.baseUrl}/api/student-data/$studentId"),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['student_data'];
+    } else {
+      throw Exception("Failed to fetch student data");
+    }
+  }
+}
+
+// Cubit for managing student profile state
 
 class StudentProfilePage extends StatefulWidget {
   StudentProfilePage({required this.type});
@@ -19,554 +52,214 @@ class StudentProfilePage extends StatefulWidget {
   _StudentProfilePageState createState() => _StudentProfilePageState();
 }
 
-class _StudentProfilePageState extends State<StudentProfilePage> {
-  Map<String, dynamic>? studentData;
+class _StudentProfilePageState extends State<StudentProfilePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    fetchStudentData();
+    _tabController = TabController(length: 2, vsync: this);
+    context.read<StudentProfileCubit>().fetchStudentProfile(context);
   }
 
-  Future<void> fetchStudentData() async {
-    final state = context.read<AppStateCubit>().state;
-    final token = state.token;
-    final studentId = state.studentId;
-
-    try {
-      var response = await http.get(
-        Uri.parse("${ApiEndPoints.baseUrl}/api/student-data/$studentId"),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          studentData = json.decode(response.body)['student_data'];
-        });
-      } else if (response.statusCode == 401) {
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (cxt1) => ScreenLogin()),
-            (route) => false);
-      } else {
-        _showErrorDialog("Failed to fetch student data.");
-      }
-    } catch (e) {
-      _showErrorDialog("An error occurred while fetching data.");
-    }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Error"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text("OK"),
-          ),
-        ],
-      ),
-    );
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
     return CustomScaffold(
       title: "Profile",
       type: widget.type,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight, // Approximate for 242 degrees
-            end: Alignment.topLeft,
-            colors: [
-              Color(0xFF0276A8), // Start color
-              Color(0xFF00A1B6), // End color
-            ],
-            stops: [0.1113, 1.0], // Corresponding stops
-          ),
-        ),
-        child: SafeArea(
-          child: ListView(
-            //  shrinkWrap: true,
+      body: SafeArea(
+        child: BlocBuilder<StudentProfileCubit, StudentProfileState>(
+          builder: (context, state) {
+            if (state is StudentProfileLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is StudentProfileError) {
+              return Center(child: Text(state.message));
+            } else if (state is StudentProfileLoaded) {
+              final studentData = state.studentData; // Extract the student data
 
-            children: [
-              const SizedBox(
-                height: 25,
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Stack(
-                    // alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 180, // Increase width for outer border
-                        height: 180, // Increase height for outer border
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                              color: Color(0xFF1EBBFF),
-                              width: 3), // Outer border
-                        ),
-                        child: CircleAvatar(
-                          radius: 169 / 2 + 5,
-                          backgroundColor: Color(0xFF0276A8),
-                          child: CircleAvatar(
-                            radius: 169 / 2 + 5,
-                            backgroundImage: NetworkImage(
-                                '$kImageUrl${studentData?['photo']}'),
-                            onBackgroundImageError: (_, __) =>
-                                null, // fallback in case of image error
-                            child: ClipOval(
-                              child: Image.network(
-                                '$kImageUrl${studentData?['photo']}',
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'assets/images/logo.png', // Path to your default image
-                                    fit: BoxFit.cover,
-                                  );
-                                },
+              return SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Profile Header
+                    // Profile Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: SizedBox(
+                        width: double.infinity, // Ensures full width
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                                begin: Alignment
+                                    .topRight, // Approximate for 242 degrees
+                                end: Alignment.topLeft,
+                                colors: [
+                                  Color(0xFF0276A8), // Start color
+                                  Color(0xFF00A1B6), // End color
+                                ]),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 10),
+                              Container(
+                                width: 180, // Increase width for outer border
+                                height: 180, // Increase height for outer border
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: Color(0xFF1EBBFF),
+                                      width: 3), // Outer border
+                                ),
+                                child: CircleAvatar(
+                                  radius: 169 / 2 + 5,
+                                  backgroundColor: const Color(0xFF0276A8),
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      '$kImageUrl${studentData?['photo']}',
+                                      width: 169,
+                                      height: 169,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/logo.png', // Fallback image
+                                          width: 169,
+                                          height: 169,
+                                          fit: BoxFit.cover,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(height: 10),
+                              Text(
+                                "${studentData['first_name']} ${studentData['middle_name']} ${studentData['last_name']}",
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold),
+                                textAlign: TextAlign
+                                    .center, // Ensure text stays centered
+                              ),
+                              const SizedBox(height: 8),
+                              Chip(
+                                backgroundColor: Colors.white,
+                                label: Text(
+                                  "Academic Year: ${studentData['active_academic_year_start']} - ${studentData['active_academic_year_end']}",
+                                  style: TextStyle(
+                                      color: Colors.blue.shade600,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  Text(
-                    '${studentData?['first_name']} ${studentData?['last_name']}',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontStyle: FontStyle.normal,
-                      fontWeight: FontWeight.w700,
                     ),
-                  ),
-                  Container(
-                    //width: size.width,
-                    height: size.height - 100,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(50.0),
-                        topRight: Radius.circular(50.0),
-                      ),
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          '${studentData?['first_name']} ${studentData?['last_name']}',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: const Color(0xFF0278A9),
-                            fontStyle: FontStyle.normal,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Table(
-                          // border: TableBorder.all(), // Add border to the table
-                          children: [
-                            TableRow(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Text(
-                                    'Class',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: const Color(0xFF494949),
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(5.0),
-                                  child: Text(
-                                    'Division',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: const Color(0xFF494949),
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            TableRow(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.all(2.0),
-                                  child: Text(
-                                    'Plus one science',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(2.0),
-                                  child: Text(
-                                    'A',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Divider(
-                          indent: 20, // Indent from the left
-                          endIndent: 20,
-                          color: Color(0xFFBEBCBC), // Indent from the right
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment
-                              .spaceEvenly, // Optional: for even spacing
-                          children: [
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      color: Colors.red,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10, 0, 0, 0),
-                                            child: Text(
-                                              'Nationality',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 12,
-                                                color: const Color(0xFF494949),
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                      )),
+
+                    // Details Section
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        elevation: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              buildInfoRow("Admission Number",
+                                  studentData['admission_number']),
+                              buildInfoRow("Class", studentData['grade']),
+                              buildInfoRow("Section", studentData['section']),
+                              buildInfoRow(
+                                  "Blood Group", studentData['blood_group']),
+                              buildInfoRow("Date of Birth", studentData['dob']),
+                              buildInfoRow(
+                                  "Nationality", studentData['nationality']),
+                              buildInfoRow("Gender", studentData['gender']),
+                              TabBar(
+                                controller: _tabController,
+                                indicatorColor: Colors.blue,
+                                labelColor: Colors.blue,
+                                unselectedLabelColor: Colors.grey,
+                                tabs: const [
+                                  Tab(text: "Address"),
+                                  Tab(text: "Parent Details"),
                                 ],
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      color: Colors.green,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            'Indian',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      color: Colors.blue,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            'Date of Birth',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              color: const Color(0xFF494949),
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      color: Colors.yellow,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            '22-05-2015',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment
-                              .end, // Optional: for even spacing
-                          children: [
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Container(
-                                      color: Colors.red,
-                                      height: 35,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10, 0, 0, 0),
-                                            child: Text(
-                                              'Mother Tongue',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 12,
-                                                color: const Color(0xFF494949),
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                              // textAlign: TextAlign.left,
-                                            ),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      color: Colors.green,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            'Malayalam',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                      color: Colors.blue,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            'Blood',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              color: const Color(0xFF494949),
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Container(
-                                      color: Colors.yellow,
-                                      height: 25,
-                                      child: Center(
-                                        child: Align(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            'O +ve',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12,
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(children: [
-                          DefaultTabController(
-                            length: 2,
-                            child: Column(
-                              children: [
-                                const TabBar(
-                                  tabs: [
-                                    Tab(text: 'Address'),
-                                    Tab(text: 'Parent Details'),
-                                  ],
-                                  labelColor: Colors.black,
-                                  unselectedLabelColor: Color(0xFF0278A9),
-                                  indicatorColor: Color(0xFF0278A9),
-                                  indicatorSize: TabBarIndicatorSize.tab,
-                                  indicatorWeight: 3,
-                                ),
-                                SizedBox(
-                                  height: 200,
+                              SizedBox(
+                                height: 250, // Set a fixed height
+                                child: Container(
+                                  color: Colors.white,
                                   child: TabBarView(
+                                    controller: _tabController,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Admission Number: 123456',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              color: const Color(0xFF0278A9),
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Admission Number: 123456',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              color: const Color(0xFF0278A9),
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Admission Number: 123456',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              color: const Color(0xFF0278A9),
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Admission Number: 123456',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              color: const Color(0xFF0278A9),
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Admission Number: 123456',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              color: const Color(0xFF0278A9),
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Admission Number: 4534534',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 14,
-                                              color: const Color(0xFF0278A9),
-                                              fontStyle: FontStyle.normal,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      AddressTab(studentData),
+                                      ParentDetailsTab(studentData),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ])
-                      ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.only(left: 15.0, top: 15.00, right: 15.00),
-                child: MaterialButton(
-                  color: Colors.blue,
-                  onPressed: () {
-                    signout(context);
-                  },
-                  child: const Text(
-                    'Logout',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
+
+                    // Tab Bar
+
+                    const SizedBox(height: 20),
+
+                    // Logout Button
+                    TextButton.icon(
+                      onPressed: () {
+                        signout(context);
+                      },
+                      icon: const Icon(Icons.logout, color: Colors.red),
+                      label: const Text("Log Out",
+                          style: TextStyle(color: Colors.red)),
                     ),
-                  ),
+
+                    const SizedBox(height: 30),
+                  ],
                 ),
-              ),
-            ],
-          ),
+              );
+            }
+            return const Center(child: Text("No student data available"));
+          },
         ),
+      ),
+    );
+  }
+
+  Widget buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: const Color(0xFF494949),
+                fontWeight: FontWeight.w400,
+              )),
+          Text(value,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w400,
+              )),
+        ],
       ),
     );
   }
@@ -577,5 +270,95 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
     indexChangeNotifier.value = 0;
     Navigator.of(cxt).pushAndRemoveUntil(
         MaterialPageRoute(builder: (cxt1) => ScreenLogin()), (route) => false);
+  }
+}
+
+class AddressTab extends StatelessWidget {
+  final Map<String, dynamic> studentData;
+  const AddressTab(this.studentData, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("📍 Permanent Address",
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: const Color(0xFF494949),
+                fontWeight: FontWeight.w400,
+              )),
+          const SizedBox(height: 5),
+          Text(studentData['permanent_address'],
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w400,
+              )),
+          const SizedBox(height: 15),
+          Text("📍 Communication Address",
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                color: const Color(0xFF494949),
+                fontWeight: FontWeight.w400,
+              )),
+          const SizedBox(height: 5),
+          Text(studentData['communication_address'],
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w400,
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+class ParentDetailsTab extends StatelessWidget {
+  final Map<String, dynamic> studentData;
+  const ParentDetailsTab(this.studentData, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildInfoRow("Father Name", studentData['father_name']),
+          buildInfoRow("Father Email", studentData['father_email']),
+          buildInfoRow("Father Mobile", studentData['father_mobile']),
+          buildInfoRow("Mother Name", studentData['mother_name']),
+          buildInfoRow("Mother Email", studentData['mother_email']),
+          buildInfoRow("Mother Mobile", studentData['mother_mobile']),
+        ],
+      ),
+    );
+  }
+
+  Widget buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: const Color(0xFF494949),
+                fontWeight: FontWeight.w400,
+              )),
+          Text(value,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.black,
+                fontWeight: FontWeight.w400,
+              )),
+        ],
+      ),
+    );
   }
 }
